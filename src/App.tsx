@@ -1,4 +1,3 @@
-import React from "react";
 import { Simulator } from "./components/Simulator";
 
 function App() {
