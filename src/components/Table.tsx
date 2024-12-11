@@ -27,8 +27,8 @@ export const Table: React.FC<TableProps> = ({ robotPosition }) => {
       padding: "8px",
       backgroundColor: "#f0f0f0",
     }}>
-      {cells.map((row, i) =>
-        row.map((cell, j) => (
+      {cells.map((row) =>
+        row.map((cell) => (
           <div
             key={`${cell.x},${cell.y}`}
             style={{
