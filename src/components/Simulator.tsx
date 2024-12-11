@@ -7,14 +7,20 @@ import { RobotState } from "../types/robot";
 export const Simulator: React.FC = () => {
   const [state, setState] = useState<RobotState>(createInitialState());
   const [output, setOutput] = useState<string>("");
+  const [warning, setWarning] = useState<string>("");
 
   const handleCommandsSubmit = (commands: string[]) => {
-    // Start with current state instead of creating new state
     let currentState = state;
     const reports: string[] = [];
+    setWarning(""); // Clear previous warnings
 
     commands.forEach((command) => {
-      currentState = processCommand(currentState, command);
+      const result = processCommand(currentState, command);
+      currentState = result.newState;
+
+      if (result.warning) {
+        setWarning(result.warning);
+      }
 
       if (command.trim() === "REPORT" && currentState.position) {
         const { x, y, facing } = currentState.position;
@@ -38,6 +44,18 @@ export const Simulator: React.FC = () => {
         Toy Robot Simulator
       </h1>
 
+      {warning && (
+        <div style={{
+          backgroundColor: "#fee2e2",
+          color: "#dc2626",
+          padding: "1rem",
+          borderRadius: "0.375rem",
+          marginTop: "1rem",
+          fontWeight: "bold"
+        }}>
+          {warning}
+        </div>
+      )}
       <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
         <div>
           <CommandInput onCommandsSubmit={handleCommandsSubmit} />

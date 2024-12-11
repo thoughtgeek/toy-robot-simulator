@@ -42,58 +42,97 @@ export const move = (position: Position): Position | null => {
   return isValidPosition(x, y) ? { x, y, facing } : null;
 };
 
-export const processCommand = (state: RobotState, command: string): RobotState => {
+interface CommandResult {
+  newState: RobotState;
+  warning?: string;
+}
+
+export const processCommand = (state: RobotState, command: string): CommandResult => {
   const [action, params] = command.trim().split(" ");
 
+  // Handle invalid or empty commands
+  if (!action) {
+    return {
+      newState: state,
+      warning: "Please enter a valid command"
+    };
+  }
+
+  // Handle PLACE command
   if (action === "PLACE" && params) {
     const [x, y, facing] = params.split(",");
     const newX = parseInt(x, 10);
     const newY = parseInt(y, 10);
 
-    if (
-      isValidPosition(newX, newY) &&
-      DIRECTIONS.includes(facing as Direction)
-    ) {
+    if (isNaN(newX) || isNaN(newY)) {
       return {
+        newState: state,
+        warning: "Invalid coordinates! Please use numbers for X and Y positions"
+      };
+    }
+
+    if (!isValidPosition(newX, newY)) {
+      return {
+        newState: state,
+        warning: "Cannot place robot outside the table boundaries!"
+      };
+    }
+
+    if (!DIRECTIONS.includes(facing as Direction)) {
+      return {
+        newState: state,
+        warning: "Invalid direction! Use NORTH, SOUTH, EAST, or WEST"
+      };
+    }
+
+    return {
+      newState: {
         position: {
           x: newX,
           y: newY,
           facing: facing as Direction,
         },
         isPlaced: true,
-      };
-    }
-    return state;
+      }
+    };
   }
 
+  // Handle commands before robot is placed
   if (!state.isPlaced || !state.position) {
-    return state;
+    return {
+      newState: state,
+      warning: "Please place the robot on the table first using the PLACE command"
+    };
   }
 
   switch (action) {
     case "MOVE": {
-      const newPosition = move(state.position);
-      return newPosition
-        ? { ...state, position: newPosition }
-        : state;
+      const potentialPosition = move(state.position);
+      if (!potentialPosition) {
+        return {
+          newState: state,
+          warning: "Cannot move robot outside the table boundaries!"
+        };
+      }
+      return { newState: { ...state, position: potentialPosition } };
     }
     case "LEFT":
-      return {
-        ...state,
-        position: {
-          ...state.position,
-          facing: rotateLeft(state.position.facing),
-        },
-      };
     case "RIGHT":
       return {
-        ...state,
-        position: {
-          ...state.position,
-          facing: rotateRight(state.position.facing),
-        },
+        newState: {
+          ...state,
+          position: {
+            ...state.position,
+            facing: action === "LEFT" ? rotateLeft(state.position.facing) : rotateRight(state.position.facing),
+          },
+        }
       };
+    case "REPORT":
+      return { newState: state };
     default:
-      return state;
+      return {
+        newState: state,
+        warning: `Unknown command: ${action}. Use PLACE, MOVE, LEFT, RIGHT, or REPORT`
+      };
   }
 };

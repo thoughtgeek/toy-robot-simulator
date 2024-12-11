@@ -10,3 +10,8 @@ export interface RobotState {
   position: Position | null;
   isPlaced: boolean;
 }
+
+export interface CommandResult {
+  newState: RobotState;
+  warning?: string;
+}
