@@ -9,7 +9,8 @@ export const Simulator: React.FC = () => {
   const [output, setOutput] = useState<string>("");
 
   const handleCommandsSubmit = (commands: string[]) => {
-    let currentState = createInitialState();
+    // Start with current state instead of creating new state
+    let currentState = state;
     const reports: string[] = [];
 
     commands.forEach((command) => {
@@ -25,6 +26,12 @@ export const Simulator: React.FC = () => {
     setOutput(reports.join("\n"));
   };
 
+  // Add reset functionality
+  const handleReset = () => {
+    setState(createInitialState());
+    setOutput("");
+  };
+
   return (
     <div style={{ maxWidth: "800px", margin: "0 auto", padding: "2rem" }}>
       <h1 style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "1.5rem" }}>
@@ -34,6 +41,20 @@ export const Simulator: React.FC = () => {
       <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
         <div>
           <CommandInput onCommandsSubmit={handleCommandsSubmit} />
+          <div style={{ marginTop: "1rem" }}>
+            <button
+              onClick={handleReset}
+              style={{
+                padding: "0.5rem 1rem",
+                backgroundColor: "#ef4444",
+                color: "white",
+                borderRadius: "0.375rem",
+                marginBottom: "1rem"
+              }}
+            >
+              Reset Robot
+            </button>
+          </div>
           <div style={{ marginTop: "1rem", color: "#666" }}>
             <div>Available commands:</div>
             <ul style={{ marginLeft: "1.5rem", listStyleType: "disc" }}>
